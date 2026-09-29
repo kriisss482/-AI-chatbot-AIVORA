@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <defs>
+    <linearGradient id="qrGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="#0d1424" stroke="#1e293b" stroke-width="3"/>
+  <!-- Top Left Corner Box -->
+  <rect x="30" y="30" width="65" height="65" rx="8" fill="none" stroke="url(#qrGrad)" stroke-width="8"/>
+  <rect x="47" y="47" width="31" height="31" rx="4" fill="url(#qrGrad)"/>
+  <!-- Top Right Corner Box -->
+  <rect x="205" y="30" width="65" height="65" rx="8" fill="none" stroke="url(#qrGrad)" stroke-width="8"/>
+  <rect x="222" y="47" width="31" height="31" rx="4" fill="url(#qrGrad)"/>
+  <!-- Bottom Left Corner Box -->
+  <rect x="30" y="205" width="65" height="65" rx="8" fill="none" stroke="url(#qrGrad)" stroke-width="8"/>
+  <rect x="47" y="222" width="31" height="31" rx="4" fill="url(#qrGrad)"/>
+  <!-- Matrix Dots Pattern -->
+  <g fill="#94a3b8" opacity="0.85">
+    <rect x="110" y="35" width="12" height="12" rx="2"/>
+    <rect x="130" y="35" width="12" height="12" rx="2"/>
+    <rect x="160" y="35" width="22" height="12" rx="2"/>
+    <rect x="110" y="55" width="22" height="12" rx="2"/>
+    <rect x="145" y="55" width="12" height="12" rx="2"/>
+    <rect x="170" y="55" width="15" height="12" rx="2"/>
+    <rect x="110" y="75" width="12" height="12" rx="2"/>
+    <rect x="135" y="75" width="25" height="12" rx="2"/>
+    <rect x="175" y="75" width="12" height="12" rx="2"/>
+    <rect x="35" y="110" width="22" height="12" rx="2"/>
+    <rect x="70" y="110" width="15" height="12" rx="2"/>
+    <rect x="100" y="110" width="12" height="12" rx="2"/>
+    <rect x="125" y="110" width="20" height="12" rx="2"/>
+    <rect x="160" y="110" width="15" height="12" rx="2"/>
+    <rect x="190" y="110" width="25" height="12" rx="2"/>
+    <rect x="230" y="110" width="35" height="12" rx="2"/>
+    <rect x="35" y="135" width="12" height="12" rx="2"/>
+    <rect x="60" y="135" width="25" height="12" rx="2"/>
+    <rect x="100" y="135" width="35" height="12" rx="2"/>
+    <rect x="150" y="135" width="25" height="12" rx="2"/>
+    <rect x="190" y="135" width="15" height="12" rx="2"/>
+    <rect x="220" y="135" width="22" height="12" rx="2"/>
+    <rect x="35" y="160" width="30" height="12" rx="2"/>
+    <rect x="80" y="160" width="15" height="12" rx="2"/>
+    <rect x="110" y="160" width="20" height="12" rx="2"/>
+    <rect x="145" y="160" width="15" height="12" rx="2"/>
+    <rect x="175" y="160" width="30" height="12" rx="2"/>
+    <rect x="220" y="160" width="15" height="12" rx="2"/>
+    <rect x="250" y="160" width="15" height="12" rx="2"/>
+    <rect x="35" y="180" width="15" height="12" rx="2"/>
+    <rect x="65" y="180" width="20" height="12" rx="2"/>
+    <rect x="100" y="180" width="15" height="12" rx="2"/>
+    <rect x="130" y="180" width="30" height="12" rx="2"/>
+    <rect x="175" y="180" width="20" height="12" rx="2"/>
+    <rect x="210" y="180" width="25" height="12" rx="2"/>
+    <rect x="250" y="180" width="15" height="12" rx="2"/>
+    <rect x="110" y="210" width="25" height="12" rx="2"/>
+    <rect x="150" y="210" width="15" height="12" rx="2"/>
+    <rect x="180" y="210" width="30" height="12" rx="2"/>
+    <rect x="230" y="210" width="35" height="12" rx="2"/>
+    <rect x="110" y="235" width="15" height="12" rx="2"/>
+    <rect x="140" y="235" width="25" height="12" rx="2"/>
+    <rect x="180" y="235" width="15" height="12" rx="2"/>
+    <rect x="210" y="235" width="25" height="12" rx="2"/>
+    <rect x="250" y="235" width="15" height="12" rx="2"/>
+    <rect x="110" y="255" width="35" height="12" rx="2"/>
+    <rect x="160" y="255" width="20" height="12" rx="2"/>
+    <rect x="195" y="255" width="30" height="12" rx="2"/>
+    <rect x="240" y="255" width="25" height="12" rx="2"/>
+  </g>
+  <!-- Center Logo Badge -->
+  <circle cx="150" cy="150" r="24" fill="#090d16" stroke="url(#qrGrad)" stroke-width="2.5"/>
+  <text x="150" y="156" fill="#38bdf8" font-family="'Plus Jakarta Sans', sans-serif" font-weight="bold" font-size="14" text-anchor="middle">AIVORA</text>
+</svg>

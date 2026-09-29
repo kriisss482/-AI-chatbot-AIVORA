@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Aivora — Admin Control Dashboard</title>
+  
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "aivora-bg": "#090d16",
+            "aivora-surface": "#0f1624",
+            "aivora-card": "#131b2e",
+            "aivora-card-hover": "#18233c",
+            "aivora-border": "#1e293b",
+            "aivora-accent": "#38bdf8",
+            "aivora-purple": "#a855f7",
+            "aivora-green": "#10b981",
+            "aivora-red": "#ef4444",
+            "aivora-yellow": "#f59e0b"
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-aivora-bg text-slate-100 min-h-screen flex flex-col font-sans selection:bg-aivora-accent/20 selection:text-aivora-accent">
+
+  <!-- Admin Top Bar -->
+  <header class="sticky top-0 z-40 bg-aivora-surface/90 backdrop-blur-xl border-b border-aivora-border px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-aivora-accent to-aivora-purple p-[1.5px] shadow-[0_0_15px_rgba(56,189,248,0.3)] flex items-center justify-center">
+        <div class="w-full h-full bg-aivora-bg rounded-[10px] flex items-center justify-center">
+          <span class="material-symbols-outlined text-aivora-accent text-[22px]">admin_panel_settings</span>
+        </div>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-lg font-bold text-white tracking-tight">Aivora Admin Command</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-aivora-purple/20 text-aivora-purple border border-aivora-purple/40 font-semibold">
+            SECURE
+          </span>
+        </div>
+        <p class="text-xs text-slate-400">Master Payment Verification &amp; User Control</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a href="/" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-aivora-card hover:bg-aivora-card-hover border border-aivora-border text-xs text-slate-300 hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-[16px]">chat</span>
+        <span>Open Chat</span>
+      </a>
+
+      <div class="flex items-center gap-2 pl-2 border-l border-aivora-border">
+        <div class="flex flex-col text-right">
+          <span class="text-xs font-semibold text-white">{{ current_user.name }}</span>
+          <span class="text-[10px] text-aivora-accent font-mono">Master Admin</span>
+        </div>
+        <a href="/admin/logout" class="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors" title="Admin Logout">
+          <span class="material-symbols-outlined text-[18px]">logout</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Admin Main Dashboard Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-8">
+
+    <!-- Flash Notifications -->
+    {% if message %}
+    <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm flex items-center gap-2.5">
+      <span class="material-symbols-outlined text-[20px]">check_circle</span>
+      <span>{{ message }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Top KPI Analytics Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Total Users -->
+      <div class="bg-aivora-surface border border-aivora-border rounded-2xl p-5 shadow-lg relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-400">TOTAL REGISTERED</span>
+          <span class="material-symbols-outlined text-aivora-accent text-[22px]">group</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold text-white font-mono">{{ users|length }}</span>
+          <span class="text-xs text-slate-500">accounts</span>
+        </div>
+      </div>
+
+      <!-- Pending Verifications -->
+      <div class="bg-aivora-surface border border-aivora-border rounded-2xl p-5 shadow-lg relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-400">PENDING PAYMENTS</span>
+          <span class="material-symbols-outlined text-aivora-yellow text-[22px]">pending_actions</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold text-aivora-yellow font-mono">
+            {{ payments|selectattr('status', 'equalto', 'pending')|list|length }}
+          </span>
+          <span class="text-xs text-slate-500">awaiting approval</span>
+        </div>
+      </div>
+
+      <!-- Active Paid Plans -->
+      <div class="bg-aivora-surface border border-aivora-border rounded-2xl p-5 shadow-lg relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-400">ACTIVE PAID PLANS</span>
+          <span class="material-symbols-outlined text-aivora-green text-[22px]">verified</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold text-aivora-green font-mono">
+            {{ payments|selectattr('status', 'equalto', 'approved')|list|length }}
+          </span>
+          <span class="text-xs text-slate-500">activated</span>
+        </div>
+      </div>
+
+      <!-- Total Revenue -->
+      <div class="bg-aivora-surface border border-aivora-border rounded-2xl p-5 shadow-lg relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-400">TOTAL EARNINGS</span>
+          <span class="material-symbols-outlined text-emerald-400 text-[22px]">payments</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold text-emerald-400 font-mono">${{ total_earnings }}</span>
+          <span class="text-xs text-slate-500">USD</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PENDING PAYMENTS VERIFICATION SECTION -->
+    <section class="bg-aivora-surface border border-aivora-border rounded-3xl p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-aivora-border pb-4">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span class="material-symbols-outlined text-aivora-yellow">qr_code_scanner</span>
+            QR Scanner Payment Verifications
+          </h2>
+          <p class="text-xs text-slate-400">Users who scanned your QR code and submitted their Transaction Reference ID</p>
+        </div>
+        <span class="text-xs font-mono text-slate-500">Real-time DB synced</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="border-b border-aivora-border text-slate-400 font-mono text-[11px] uppercase">
+              <th class="py-3 px-4">User</th>
+              <th class="py-3 px-4">Plan Selected</th>
+              <th class="py-3 px-4">Amount</th>
+              <th class="py-3 px-4">Duration</th>
+              <th class="py-3 px-4">Transaction / UTR ID</th>
+              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-aivora-border">
+            {% set pending_list = payments|selectattr('status', 'equalto', 'pending')|list %}
+            {% if pending_list|length == 0 %}
+            <tr>
+              <td colspan="7" class="py-8 text-center text-slate-500 font-mono">
+                No pending payment requests right now. All requests are cleared!
+              </td>
+            </tr>
+            {% else %}
+              {% for p in pending_list %}
+              <tr class="hover:bg-aivora-card/50 transition-colors">
+                <td class="py-3.5 px-4">
+                  <div class="flex flex-col">
+                    <span class="font-bold text-white">{{ p.user_name }}</span>
+                    <span class="text-[11px] text-slate-400 font-mono">{{ p.user_email }}</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 font-semibold text-aivora-accent">{{ p.plan_name }}</td>
+                <td class="py-3.5 px-4 font-bold font-mono text-emerald-400">{{ p.amount }}</td>
+                <td class="py-3.5 px-4 font-mono text-slate-300">{{ p.duration }}</td>
+                <td class="py-3.5 px-4">
+                  <span class="px-2 py-1 rounded bg-slate-800 border border-slate-700 font-mono text-aivora-yellow select-all font-semibold">
+                    {{ p.transaction_id }}
+                  </span>
+                </td>
+                <td class="py-3.5 px-4">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-yellow-500/10 text-yellow-400 border border-yellow-500/30">
+                    PENDING
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <form method="POST" action="/admin/approve-payment/{{ p.id }}">
+                      <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-sm">
+                        <span class="material-symbols-outlined text-[14px]">check</span>
+                        Approve &amp; Activate
+                      </button>
+                    </form>
+                    <form method="POST" action="/admin/reject-payment/{{ p.id }}">
+                      <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs transition-colors cursor-pointer">
+                        Reject
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TWO COLUMN: QR Code Settings & All Users List -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left Column: Payment QR Code & Scanner Settings -->
+      <div class="bg-aivora-surface border border-aivora-border rounded-3xl p-6 shadow-xl space-y-5">
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <span class="material-symbols-outlined text-aivora-accent">qr_code</span>
+            Your Payment Scanner
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">This QR code is shown to users when paying</p>
+        </div>
+
+        <!-- QR Code Preview -->
+        <div class="p-4 bg-aivora-bg rounded-2xl border border-aivora-border flex flex-col items-center justify-center space-y-3">
+          <img src="{{ qr_image }}" alt="Payment QR Code" class="w-48 h-48 rounded-xl object-contain bg-slate-900 border border-slate-800 p-2 shadow-inner"/>
+          <div class="text-center">
+            <span class="text-xs font-semibold text-slate-300">Active UPI ID / Account</span>
+            <p class="text-xs font-mono text-aivora-accent font-bold mt-0.5">{{ upi_id }}</p>
+          </div>
+        </div>
+
+        <!-- Form to Update QR Image or UPI -->
+        <form method="POST" action="/admin/update-settings" enctype="multipart/form-data" class="space-y-3.5 pt-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Upload New QR Code Image</label>
+            <input type="file" name="qr_file" accept="image/*" class="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-aivora-card file:text-aivora-accent hover:file:bg-aivora-card-hover cursor-pointer"/>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Your UPI ID or Account Number</label>
+            <input type="text" name="upi_id" value="{{ upi_id }}" placeholder="yourname@okhdfcbank" required
+                   class="w-full bg-aivora-card border border-aivora-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-aivora-accent font-mono"/>
+          </div>
+
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-aivora-accent hover:bg-aivora-accent/90 text-slate-950 font-bold text-xs transition-all cursor-pointer">
+            Save Payment Details
+          </button>
+        </form>
+      </div>
+
+      <!-- Right Column: Registered Users Table -->
+      <div class="lg:col-span-2 bg-aivora-surface border border-aivora-border rounded-3xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between border-b border-aivora-border pb-3">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <span class="material-symbols-outlined text-aivora-accent">manage_accounts</span>
+              Registered User Accounts
+            </h3>
+            <p class="text-xs text-slate-400">All registered users and their current subscription status</p>
+          </div>
+          <span class="text-xs font-mono text-slate-500">{{ users|length }} Total</span>
+        </div>
+
+        <div class="overflow-x-auto max-h-[460px] overflow-y-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-aivora-border text-slate-400 font-mono text-[11px] uppercase sticky top-0 bg-aivora-surface">
+                <th class="py-2.5 px-3">ID</th>
+                <th class="py-2.5 px-3">Name &amp; Email</th>
+                <th class="py-2.5 px-3">Role</th>
+                <th class="py-2.5 px-3">Current Plan</th>
+                <th class="py-2.5 px-3">Plan Expiry</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-aivora-border">
+              {% for u in users %}
+              <tr class="hover:bg-aivora-card/40 transition-colors">
+                <td class="py-3 px-3 font-mono text-slate-500">#{{ u.id }}</td>
+                <td class="py-3 px-3">
+                  <div class="flex flex-col">
+                    <span class="font-bold text-white">{{ u.name }}</span>
+                    <span class="text-[11px] text-slate-400 font-mono">{{ u.email }}</span>
+                  </div>
+                </td>
+                <td class="py-3 px-3">
+                  {% if u.role == 'admin' %}
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40">ADMIN</span>
+                  {% else %}
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-slate-800 text-slate-300">USER</span>
+                  {% endif %}
+                </td>
+                <td class="py-3 px-3">
+                  <span class="font-semibold {% if 'Pro' in u.plan_name %}text-aivora-purple{% elif 'Medium' in u.plan_name %}text-aivora-accent{% else %}text-slate-300{% endif %}">
+                    {{ u.plan_name }}
+                  </span>
+                </td>
+                <td class="py-3 px-3 font-mono text-slate-400 text-[11px]">
+                  {{ u.plan_expiry[:10] if u.plan_expiry else 'N/A' }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Aivora — Next-Gen AI Assistant</title>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+
+  <!-- Marked & Highlight.js for rich Markdown & Syntax Highlighting -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "aivora-bg": "#090d16",
+            "aivora-surface": "#0f1624",
+            "aivora-card": "#131b2e",
+            "aivora-card-hover": "#18233c",
+            "aivora-border": "#1e293b",
+            "aivora-border-focus": "#38bdf8",
+            "aivora-accent": "#38bdf8",
+            "aivora-purple": "#a855f7",
+            "aivora-indigo": "#6366f1",
+            "aivora-cyan": "#00f0ff",
+            "aivora-green": "#10b981",
+            "text-primary": "#f8fafc",
+            "text-secondary": "#94a3b8",
+            "text-muted": "#64748b"
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          animation: {
+            'glow-pulse': 'glowPulse 3s ease-in-out infinite',
+            'aurora': 'auroraShift 10s ease infinite'
+          },
+          keyframes: {
+            glowPulse: {
+              '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+              '50%': { opacity: '0.8', transform: 'scale(1.05)' }
+            },
+            auroraShift: {
+              '0%': { backgroundPosition: '0% 50%' },
+              '50%': { backgroundPosition: '100% 50%' },
+              '100%': { backgroundPosition: '0% 50%' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    /* Ambient Background Glow */
+    .aivora-ambient-glow {
+      background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.12) 0%, rgba(168, 85, 247, 0.06) 35%, transparent 70%);
+    }
+
+    /* Aivora Gradient Emblem */
+    .aivora-gradient {
+      background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+    }
+
+    .aivora-gradient-text {
+      background: linear-gradient(135deg, #38bdf8, #818cf8, #e879f9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Markdown prose styles */
+    .prose-aivora p { margin-bottom: 0.85rem; line-height: 1.7; }
+    .prose-aivora p:last-child { margin-bottom: 0; }
+    .prose-aivora ul { list-style-type: disc; margin-left: 1.25rem; margin-bottom: 0.85rem; }
+    .prose-aivora ol { list-style-type: decimal; margin-left: 1.25rem; margin-bottom: 0.85rem; }
+    .prose-aivora li { margin-bottom: 0.35rem; }
+    .prose-aivora strong { color: #38bdf8; font-weight: 600; }
+    .prose-aivora h1, .prose-aivora h2, .prose-aivora h3 {
+      color: #f8fafc;
+      font-weight: 700;
+      margin-top: 1.25rem;
+      margin-bottom: 0.6rem;
+    }
+    .prose-aivora code:not(pre code) {
+      background-color: #1a2234;
+      color: #38bdf8;
+      padding: 0.15rem 0.45rem;
+      border-radius: 0.35rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88em;
+      border: 1px solid #27354f;
+    }
+
+    /* Streaming Cursor */
+    .streaming-cursor::after {
+      content: '▋';
+      display: inline-block;
+      vertical-align: baseline;
+      color: #38bdf8;
+      animation: blink 0.8s infinite;
+      margin-left: 3px;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+
+<body class="bg-aivora-bg text-text-primary min-h-screen flex flex-col font-sans selection:bg-aivora-accent/20 selection:text-aivora-accent relative overflow-x-hidden">
+
+  <!-- Ambient Light Effect -->
+  <div class="fixed top-0 left-0 right-0 h-96 aivora-ambient-glow pointer-events-none z-0"></div>
+
+  <!-- Top Header Navigation -->
+  <header class="sticky top-0 z-40 bg-aivora-bg/80 backdrop-blur-xl border-b border-aivora-border/80 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+    
+    <!-- Left: Brand Logo & Title -->
+    <div class="flex items-center gap-3">
+      <div class="relative w-9 h-9 rounded-xl aivora-gradient p-[1.5px] shadow-[0_0_18px_rgba(56,189,248,0.35)] flex items-center justify-center">
+        <div class="w-full h-full bg-aivora-bg rounded-[10.5px] flex items-center justify-center">
+          <span class="material-symbols-outlined text-transparent bg-clip-text aivora-gradient text-[22px]">
+            neurology
+          </span>
+        </div>
+      </div>
+
+      <div class="flex flex-col">
+        <div class="flex items-center gap-2">
+          <span class="text-xl font-bold tracking-tight text-white flex items-center gap-1.5">
+            <span class="aivora-gradient-text font-extrabold tracking-wide">Aivora</span>
+          </span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono tracking-wider font-semibold bg-aivora-accent/10 text-aivora-accent border border-aivora-accent/30">
+            PRO AI
+          </span>
+        </div>
+        <span class="text-[11px] text-text-muted flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-aivora-green animate-pulse"></span>
+          Intelligent Reasoning &amp; Dialogue Core
+        </span>
+      </div>
+    </div>
+
+    <!-- Right: Model Switcher & Quick Actions -->
+    <div class="flex items-center gap-2.5">
+      
+      <!-- Model Dropdown -->
+      <div class="relative inline-flex items-center">
+        <button id="model-dropdown-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-aivora-surface hover:bg-aivora-card border border-aivora-border text-xs sm:text-sm font-medium transition-all shadow-sm cursor-pointer" type="button">
+          <span class="w-2 h-2 rounded-full bg-aivora-accent"></span>
+          <span id="current-model-label" class="text-text-primary font-medium">Aivora Turbo</span>
+          <span class="material-symbols-outlined text-text-secondary text-[18px]">expand_more</span>
+        </button>
+
+        <div id="model-dropdown-menu" class="hidden absolute top-full right-0 mt-2 w-72 bg-aivora-card border border-aivora-border rounded-xl shadow-2xl py-2 z-50">
+          <div class="px-3 py-1 text-[11px] font-mono uppercase tracking-wider text-text-muted">Select Engine</div>
+          <button class="model-option w-full text-left px-3 py-2.5 text-xs hover:bg-aivora-card-hover flex items-center justify-between text-aivora-accent font-medium transition-colors" data-model="gemma-4-26b-a4b-it">
+            <div class="flex flex-col">
+              <span class="font-semibold">Aivora Turbo</span>
+              <span class="text-[10px] text-text-muted">Ultra-fast real-time responses</span>
+            </div>
+            <span class="text-[9px] bg-aivora-accent/20 px-1.5 py-0.5 rounded text-aivora-accent font-mono">Fastest</span>
+          </button>
+          <button class="model-option w-full text-left px-3 py-2.5 text-xs hover:bg-aivora-card-hover flex items-center justify-between text-text-primary transition-colors" data-model="gemma-4-31b-it">
+            <div class="flex flex-col">
+              <span class="font-semibold">Aivora Pro</span>
+              <span class="text-[10px] text-text-muted">Complex coding &amp; deep reasoning</span>
+            </div>
+            <span class="text-[9px] bg-aivora-purple/20 px-1.5 py-0.5 rounded text-aivora-purple font-mono">Pro</span>
+          </button>
+          <button class="model-option w-full text-left px-3 py-2.5 text-xs hover:bg-aivora-card-hover flex items-center justify-between text-text-primary transition-colors" data-model="gemini-3.8-flash">
+            <div class="flex flex-col">
+              <span class="font-semibold">Gemini 3.8 Flash</span>
+              <span class="text-[10px] text-text-muted">Advanced Google intelligence</span>
+            </div>
+            <span class="text-[9px] bg-aivora-indigo/20 px-1.5 py-0.5 rounded text-aivora-indigo font-mono">Engine</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Auto-Speak Audio Readout Toggle -->
+      <button id="toggle-voice-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-aivora-surface hover:bg-aivora-card border border-aivora-border text-xs sm:text-sm text-text-secondary hover:text-aivora-accent transition-all cursor-pointer" title="Toggle Auto Voice Readout">
+        <span class="material-symbols-outlined text-[18px]" id="voice-toggle-icon">volume_up</span>
+        <span class="hidden md:inline" id="voice-toggle-text">Voice On</span>
+      </button>
+
+      <!-- New Chat / Clear Memory Button -->
+      <button id="new-chat-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-aivora-surface hover:bg-aivora-card border border-aivora-border text-xs sm:text-sm text-text-secondary hover:text-text-primary transition-all cursor-pointer" title="Start New Conversation">
+        <span class="material-symbols-outlined text-[18px]">add_circle</span>
+        <span class="hidden sm:inline">New Chat</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Central Conversation Container -->
+  <main class="flex-1 flex flex-col max-w-4xl w-full mx-auto px-4 sm:px-6 relative z-10 pb-4">
+    
+    <!-- Messages Viewport -->
+    <div id="messages-container" class="flex-1 overflow-y-auto py-6 space-y-6">
+      
+      <!-- Welcome Hero Card -->
+      <div id="welcome-card" class="flex flex-col space-y-4 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-aivora-surface/90 to-aivora-card/70 border border-aivora-border/80 shadow-2xl backdrop-blur-md">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-2xl aivora-gradient p-[2px] shadow-[0_0_20px_rgba(56,189,248,0.4)] flex items-center justify-center">
+              <div class="w-full h-full bg-aivora-bg rounded-[14px] flex items-center justify-center">
+                <span class="material-symbols-outlined text-aivora-accent text-[24px]">auto_awesome</span>
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                Namaste! Main hoon <span class="aivora-gradient-text">Aivora</span>
+              </h2>
+              <p class="text-xs text-text-muted">Aapka high-intelligence personal AI companion</p>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-semibold bg-aivora-green/10 text-aivora-green border border-aivora-green/30 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-aivora-green"></span>
+            Ready
+          </span>
+        </div>
+
+        <div class="text-sm leading-relaxed text-text-secondary prose-aivora pt-1">
+          <p>
+            Aap mujhse koi bhi sawal pooch sakte hain—chahe coding, bug fixing, science, mathematics, creative writing, study help, ya daily guidance ho. Main Hindi aur English dono bhashao me natural tarike se baat karti hoon.
+          </p>
+        </div>
+
+        <!-- Quick Launch Prompts -->
+        <div class="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <button class="hero-prompt-btn p-3 rounded-2xl bg-aivora-card/80 hover:bg-aivora-card-hover border border-aivora-border text-left transition-all hover:border-aivora-accent/40 group cursor-pointer" data-prompt="Python me Fast API aur Flask me kya antar hai? Simple bhasha me samjhao.">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-text-primary group-hover:text-aivora-accent transition-colors">Python Flask vs FastAPI</span>
+              <span class="material-symbols-outlined text-[16px] text-text-muted group-hover:text-aivora-accent">arrow_forward</span>
+            </div>
+            <p class="text-[11px] text-text-muted mt-1 truncate">Architecture, speed aur best use cases</p>
+          </button>
+
+          <button class="hero-prompt-btn p-3 rounded-2xl bg-aivora-card/80 hover:bg-aivora-card-hover border border-aivora-border text-left transition-all hover:border-aivora-accent/40 group cursor-pointer" data-prompt="Mujhe ek attractive modern portfolio website ka plan aur tech stack suggest karo.">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-text-primary group-hover:text-aivora-accent transition-colors">Modern Web Portfolio</span>
+              <span class="material-symbols-outlined text-[16px] text-text-muted group-hover:text-aivora-accent">arrow_forward</span>
+            </div>
+            <p class="text-[11px] text-text-muted mt-1 truncate">Design tips, animations aur clean stack</p>
+          </button>
+
+          <button class="hero-prompt-btn p-3 rounded-2xl bg-aivora-card/80 hover:bg-aivora-card-hover border border-aivora-border text-left transition-all hover:border-aivora-accent/40 group cursor-pointer" data-prompt="Quantum Computing kaise kaam karta hai? Ek aam insaan ki bhasha me samjhao.">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-text-primary group-hover:text-aivora-accent transition-colors">Quantum Computing</span>
+              <span class="material-symbols-outlined text-[16px] text-text-muted group-hover:text-aivora-accent">arrow_forward</span>
+            </div>
+            <p class="text-[11px] text-text-muted mt-1 truncate">Qubits, Superposition aur simple analogy</p>
+          </button>
+
+          <button class="hero-prompt-btn p-3 rounded-2xl bg-aivora-card/80 hover:bg-aivora-card-hover border border-aivora-border text-left transition-all hover:border-aivora-accent/40 group cursor-pointer" data-prompt="Mera mood fresh karne ke liye ek thoughtful aur inspiring baat batao.">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-text-primary group-hover:text-aivora-accent transition-colors">Daily Inspiration</span>
+              <span class="material-symbols-outlined text-[16px] text-text-muted group-hover:text-aivora-accent">arrow_forward</span>
+            </div>
+            <p class="text-[11px] text-text-muted mt-1 truncate">Positive thoughts aur energy boost</p>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Floating Input Area -->
+    <div class="sticky bottom-2 left-0 right-0 pt-2 flex flex-col space-y-2.5">
+      
+      <!-- Suggestion Pill Chips -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+        <button class="chip-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-aivora-surface hover:bg-aivora-card border border-aivora-border text-text-secondary hover:text-aivora-accent whitespace-nowrap transition-all shadow-sm cursor-pointer" data-prompt="Aivora, aap kya-kya kar sakti ho? Detail me batao.">
+          <span class="material-symbols-outlined text-[14px] text-aivora-accent">psychology</span>
+          <span>Capabilities</span>
+        </button>
+        <button class="chip-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-aivora-surface hover:bg-aivora-card border border-aivora-border text-text-secondary hover:text-aivora-purple whitespace-nowrap transition-all shadow-sm cursor-pointer" data-prompt="Mujhe ek engaging LinkedIn post likh kar do AI trends ke upar.">
+          <span class="material-symbols-outlined text-[14px] text-aivora-purple">edit_note</span>
+          <span>Write LinkedIn Post</span>
+        </button>
+        <button class="chip-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-aivora-surface hover:bg-aivora-card border border-aivora-border text-text-secondary hover:text-aivora-indigo whitespace-nowrap transition-all shadow-sm cursor-pointer" data-prompt="JavaScript me async/await aur Promises ka concept clear karo code example ke sath.">
+          <span class="material-symbols-outlined text-[14px] text-aivora-indigo">code</span>
+          <span>Explain Async/Await</span>
+        </button>
+      </div>
+
+      <!-- Modern Composer Bar -->
+      <div class="relative bg-aivora-surface/95 backdrop-blur-xl border border-aivora-border/90 rounded-3xl p-2.5 sm:p-3 shadow-2xl focus-within:border-aivora-accent/50 focus-within:shadow-[0_0_25px_rgba(56,189,248,0.2)] transition-all">
+        
+        <!-- Live Voice Input Waveform Notification (shows during voice recording) -->
+        <div id="voice-status-bar" class="hidden mb-2 px-3 py-1.5 rounded-xl bg-aivora-card border border-aivora-accent/30 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+            <span class="font-mono text-aivora-accent font-semibold">AIVORA IS LISTENING...</span>
+          </div>
+          <span class="text-[11px] text-text-muted">Speak now in Hindi or English</span>
+        </div>
+
+        <div class="flex items-end gap-2 px-1">
+          <!-- Textarea -->
+          <textarea id="composer-textarea" rows="1" class="flex-1 bg-transparent resize-none border-0 p-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-0 leading-relaxed max-h-40 overflow-y-auto" placeholder="Ask Aivora anything..."></textarea>
+
+          <!-- Action Controls -->
+          <div class="flex items-center gap-1.5 pb-0.5">
+            <!-- Voice Dictation Button -->
+            <button id="mic-btn" class="p-2 rounded-xl bg-aivora-card hover:bg-aivora-card-hover border border-aivora-border text-text-secondary hover:text-aivora-accent transition-all cursor-pointer" title="Speak to Aivora">
+              <span class="material-symbols-outlined text-[20px]" id="mic-icon">mic</span>
+            </button>
+
+            <!-- Send Message Button -->
+            <button id="send-btn" class="p-2.5 rounded-xl aivora-gradient hover:opacity-90 text-black font-bold shadow-lg transition-all active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" title="Send message">
+              <span class="material-symbols-outlined text-[20px]" id="send-icon">arrow_upward</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Micro Disclaimer -->
+      <div class="flex items-center justify-between text-[11px] text-text-muted px-2">
+        <span>Aivora AI • Connected via Flask SSE Streaming</span>
+        <span class="flex items-center gap-1 text-[11px] font-mono">
+          <span class="w-1.5 h-1.5 rounded-full bg-aivora-accent"></span>
+          Session Active
+        </span>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Client-Side JavaScript Logic -->
+  <script>
+    // State
+    let currentSessionId = 'aivora_' + Math.random().toString(36).substring(2, 9);
+    let selectedModel = 'gemma-4-26b-a4b-it';
+    let isGenerating = false;
+    let abortController = null;
+    let autoSpeakResponses = true;
+    let isListening = false;
+
+    // DOM Elements
+    const messagesContainer = document.getElementById('messages-container');
+    const composerTextarea = document.getElementById('composer-textarea');
+    const sendBtn = document.getElementById('send-btn');
+    const sendIcon = document.getElementById('send-icon');
+    const micBtn = document.getElementById('mic-btn');
+    const micIcon = document.getElementById('mic-icon');
+    const voiceStatusBar = document.getElementById('voice-status-bar');
+    const modelDropdownBtn = document.getElementById('model-dropdown-btn');
+    const modelDropdownMenu = document.getElementById('model-dropdown-menu');
+    const currentModelLabel = document.getElementById('current-model-label');
+    const newChatBtn = document.getElementById('new-chat-btn');
+    const toggleVoiceBtn = document.getElementById('toggle-voice-btn');
+    const voiceToggleIcon = document.getElementById('voice-toggle-icon');
+    const voiceToggleText = document.getElementById('voice-toggle-text');
+
+    // Auto resize textarea
+    composerTextarea.addEventListener('input', () => {
+      composerTextarea.style.height = 'auto';
+      composerTextarea.style.height = Math.min(composerTextarea.scrollHeight, 160) + 'px';
+    });
+
+    // Enter to send (Shift+Enter for newline)
+    composerTextarea.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+
+    // Prompt chip listeners
+    document.querySelectorAll('.chip-btn, .hero-prompt-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const prompt = btn.getAttribute('data-prompt');
+        composerTextarea.value = prompt;
+        sendMessage();
+      });
+    });
+
+    // Model Selector Dropdown
+    modelDropdownBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      modelDropdownMenu.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', () => {
+      modelDropdownMenu.classList.add('hidden');
+    });
+
+    document.querySelectorAll('.model-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedModel = btn.getAttribute('data-model');
+        const name = btn.querySelector('.font-semibold').innerText;
+        currentModelLabel.innerText = name;
+        modelDropdownMenu.classList.add('hidden');
+      });
+    });
+
+    // Voice Readout Toggle
+    toggleVoiceBtn.addEventListener('click', () => {
+      autoSpeakResponses = !autoSpeakResponses;
+      if (autoSpeakResponses) {
+        voiceToggleIcon.innerText = 'volume_up';
+        voiceToggleText.innerText = 'Voice On';
+        toggleVoiceBtn.classList.remove('text-text-muted');
+        toggleVoiceBtn.classList.add('text-text-secondary');
+      } else {
+        voiceToggleIcon.innerText = 'volume_off';
+        voiceToggleText.innerText = 'Voice Off';
+        toggleVoiceBtn.classList.add('text-text-muted');
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      }
+    });
+
+    // New Chat / Reset Memory
+    newChatBtn.addEventListener('click', startNewChat);
+
+    async function startNewChat() {
+      currentSessionId = 'aivora_' + Math.random().toString(36).substring(2, 9);
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+      try {
+        await fetch('/api/reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: currentSessionId, model: selectedModel })
+        });
+      } catch (err) {
+        console.error('Reset error:', err);
+      }
+
+      messagesContainer.innerHTML = `
+        <div class="flex flex-col space-y-3 p-6 rounded-3xl bg-gradient-to-br from-aivora-surface/90 to-aivora-card/70 border border-aivora-border/80 shadow-2xl backdrop-blur-md">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl aivora-gradient p-[1.5px] shadow-sm flex items-center justify-center">
+              <div class="w-full h-full bg-aivora-bg rounded-[9.5px] flex items-center justify-center">
+                <span class="material-symbols-outlined text-aivora-accent text-[20px]">auto_awesome</span>
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-bold text-white text-sm">Aivora Memory Cleared</span>
+              <span class="text-[11px] text-text-muted">Fresh conversation session initialized</span>
+            </div>
+          </div>
+          <p class="text-sm text-text-secondary">
+            Purani chat reset ho gayi hai. Naya sawal pucho, Aivora tayyar hai! ✨
+          </p>
+        </div>
+      `;
+      composerTextarea.value = '';
+      composerTextarea.focus();
+    }
+
+    // Voice Dictation (Speech Recognition)
+    let recognition = null;
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'hi-IN';
+
+      recognition.onstart = () => {
+        isListening = true;
+        micBtn.classList.add('bg-aivora-accent/20', 'text-aivora-accent', 'border-aivora-accent/40');
+        voiceStatusBar.classList.remove('hidden');
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        composerTextarea.value = transcript;
+        voiceStatusBar.classList.add('hidden');
+        sendMessage();
+      };
+
+      recognition.onerror = () => {
+        isListening = false;
+        micBtn.classList.remove('bg-aivora-accent/20', 'text-aivora-accent', 'border-aivora-accent/40');
+        voiceStatusBar.classList.add('hidden');
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        micBtn.classList.remove('bg-aivora-accent/20', 'text-aivora-accent', 'border-aivora-accent/40');
+        voiceStatusBar.classList.add('hidden');
+      };
+
+      micBtn.addEventListener('click', () => {
+        if (isListening) {
+          recognition.stop();
+        } else {
+          recognition.start();
+        }
+      });
+    } else {
+      micBtn.addEventListener('click', () => {
+        alert('Voice speech recognition is not supported in this browser.');
+      });
+    }
+
+    // Send Message Function
+    async function sendMessage() {
+      const text = composerTextarea.value.trim();
+      if (!text || isGenerating) return;
+
+      composerTextarea.value = '';
+      composerTextarea.style.height = 'auto';
+
+      // 1. Append User Message
+      appendUserTurn(text);
+
+      // 2. Append Aivora Placeholder Message
+      const aivoraDiv = appendAivoraPlaceholder();
+      const contentEl = aivoraDiv.querySelector('.aivora-content');
+      const statusBadge = aivoraDiv.querySelector('.aivora-status-badge');
+      const latencyBadge = aivoraDiv.querySelector('.aivora-latency-badge');
+
+      isGenerating = true;
+      sendIcon.innerText = 'stop';
+
+      let fullResponseText = '';
+      abortController = new AbortController();
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            session_id: currentSessionId,
+            model: selectedModel
+          }),
+          signal: abortController.signal
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.error || 'Server error occurred');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.replace('data: ', '').trim();
+              if (!jsonStr) continue;
+
+              try {
+                const parsed = JSON.parse(jsonStr);
+
+                if (parsed.error) {
+                  throw new Error(parsed.error);
+                }
+
+                if (parsed.chunk) {
+                  fullResponseText += parsed.chunk;
+                  renderMarkdown(contentEl, fullResponseText, true);
+                  scrollBottom();
+                }
+
+                if (parsed.done) {
+                  if (parsed.latency_ms) {
+                    latencyBadge.innerText = `• ${parsed.latency_ms}ms`;
+                  }
+                  if (parsed.model) {
+                    aivoraDiv.querySelector('.aivora-model-tag').innerText = parsed.model;
+                  }
+                }
+              } catch (e) {
+                console.error('SSE JSON error:', e);
+              }
+            }
+          }
+        }
+
+        // Final render without cursor
+        renderMarkdown(contentEl, fullResponseText, false);
+        statusBadge.innerHTML = `
+          <span class="w-2 h-2 rounded-full bg-aivora-green"></span>
+          <span class="text-aivora-green font-medium">Done</span>
+        `;
+
+        // Attach action buttons (Copy, Speak)
+        attachActionListeners(aivoraDiv, fullResponseText);
+
+        // Auto-speak if voice is enabled
+        if (autoSpeakResponses && 'speechSynthesis' in window) {
+          speakText(fullResponseText);
+        }
+
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          renderMarkdown(contentEl, fullResponseText + '\n\n*(Stopped by user)*', false);
+        } else {
+          contentEl.innerHTML = `<p class="text-red-400 font-medium"><strong>Aivora Error:</strong> ${err.message}</p>`;
+        }
+        statusBadge.innerHTML = `
+          <span class="w-2 h-2 rounded-full bg-red-400"></span>
+          <span class="text-red-400 font-medium">Error</span>
+        `;
+      } finally {
+        isGenerating = false;
+        sendIcon.innerText = 'arrow_upward';
+        scrollBottom();
+      }
+    }
+
+    // Append User Bubble
+    function appendUserTurn(text) {
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const userDiv = document.createElement('div');
+      userDiv.className = 'flex flex-col items-end w-full space-y-1.5';
+      userDiv.innerHTML = `
+        <div class="flex items-center gap-1.5 text-[11px] font-mono text-text-muted pr-1">
+          <span class="text-text-secondary font-medium">YOU</span>
+          <span>•</span>
+          <span>${timeStr}</span>
+        </div>
+        <div class="max-w-[85%] sm:max-w-2xl bg-aivora-surface border border-aivora-border rounded-3xl rounded-tr-none px-5 py-3.5 shadow-sm text-text-primary text-sm leading-relaxed">
+          <p class="whitespace-pre-wrap">${escapeHtml(text)}</p>
+        </div>
+      `;
+      messagesContainer.appendChild(userDiv);
+      scrollBottom();
+    }
+
+    // Append Aivora Placeholder
+    function appendAivoraPlaceholder() {
+      const aivoraDiv = document.createElement('div');
+      aivoraDiv.className = 'flex flex-col w-full space-y-3 p-5 sm:p-6 rounded-3xl bg-aivora-surface/80 border border-aivora-border shadow-xl backdrop-blur-sm';
+      aivoraDiv.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg aivora-gradient p-[1.5px] shadow-sm flex items-center justify-center">
+              <div class="w-full h-full bg-aivora-bg rounded-[5.5px] flex items-center justify-center">
+                <span class="material-symbols-outlined text-aivora-accent text-[16px]">neurology</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 font-mono text-xs">
+              <span class="font-bold text-white tracking-wide">Aivora</span>
+              <span class="aivora-model-tag text-[10px] px-1.5 py-0.5 rounded bg-aivora-card border border-aivora-border text-text-muted">${selectedModel}</span>
+              <span class="aivora-latency-badge text-text-muted text-[11px] hidden sm:inline">• Thinking...</span>
+            </div>
+          </div>
+          <div class="aivora-status-badge flex items-center gap-1.5 text-xs font-mono">
+            <span class="w-2 h-2 rounded-full bg-aivora-accent animate-ping"></span>
+            <span class="text-aivora-accent font-medium">Streaming</span>
+          </div>
+        </div>
+
+        <div class="aivora-content text-sm leading-relaxed text-text-primary prose-aivora streaming-cursor">
+        </div>
+
+        <!-- Action Toolbar -->
+        <div class="action-toolbar hidden flex items-center justify-between pt-3 border-t border-aivora-border/60 text-xs">
+          <div class="flex items-center gap-1.5 text-text-muted">
+            <button class="btn-copy p-1.5 rounded-lg hover:bg-aivora-card hover:text-text-primary transition-colors cursor-pointer" title="Copy Response">
+              <span class="material-symbols-outlined text-[16px]">content_copy</span>
+            </button>
+            <button class="btn-speak p-1.5 rounded-lg hover:bg-aivora-card hover:text-aivora-accent transition-colors cursor-pointer" title="Read Aloud">
+              <span class="material-symbols-outlined text-[16px]">volume_up</span>
+            </button>
+          </div>
+          <span class="text-[10px] font-mono text-text-muted">Aivora Intelligence Core</span>
+        </div>
+      `;
+      messagesContainer.appendChild(aivoraDiv);
+      scrollBottom();
+      return aivoraDiv;
+    }
+
+    // Markdown Parser & Code Syntax Highlighting
+    function renderMarkdown(element, rawText, isStreaming) {
+      if (isStreaming) {
+        element.classList.add('streaming-cursor');
+      } else {
+        element.classList.remove('streaming-cursor');
+      }
+
+      marked.setOptions({ breaks: true, gfm: true });
+      element.innerHTML = marked.parse(rawText || '');
+
+      // Highlight code blocks and attach copy button
+      element.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightElement(block);
+        const pre = block.parentElement;
+        if (!pre.classList.contains('enhanced-pre')) {
+          pre.classList.add('enhanced-pre', 'relative', 'rounded-2xl', 'p-4', 'bg-aivora-bg', 'border', 'border-aivora-border', 'overflow-x-auto', 'my-3', 'font-mono', 'text-xs');
+          
+          // Copy Code Button
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'absolute top-2.5 right-2.5 px-2 py-1 rounded-lg bg-aivora-card hover:bg-aivora-card-hover border border-aivora-border text-text-muted hover:text-text-primary text-[10px] font-mono flex items-center gap-1 transition-all cursor-pointer';
+          copyBtn.innerHTML = '<span class="material-symbols-outlined text-[12px]">content_copy</span> Copy';
+          copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(block.innerText);
+            copyBtn.innerHTML = '<span class="material-symbols-outlined text-[12px] text-aivora-green">check</span> Copied';
+            setTimeout(() => {
+              copyBtn.innerHTML = '<span class="material-symbols-outlined text-[12px]">content_copy</span> Copy';
+            }, 2000);
+          });
+          pre.appendChild(copyBtn);
+        }
+      });
+    }
+
+    // Action Toolbar Listeners
+    function attachActionListeners(div, text) {
+      const toolbar = div.querySelector('.action-toolbar');
+      if (toolbar) toolbar.classList.remove('hidden');
+
+      const copyBtn = div.querySelector('.btn-copy');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(text);
+          copyBtn.innerHTML = '<span class="material-symbols-outlined text-[16px] text-aivora-green">check</span>';
+          setTimeout(() => {
+            copyBtn.innerHTML = '<span class="material-symbols-outlined text-[16px]">content_copy</span>';
+          }, 2000);
+        });
+      }
+
+      const speakBtn = div.querySelector('.btn-speak');
+      if (speakBtn) {
+        speakBtn.addEventListener('click', () => {
+          speakText(text);
+        });
+      }
+    }
+
+    // Speech Synthesis
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+
+      const cleanText = text.replace(/[`*#_]/g, '');
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.rate = 1.05;
+      utterance.pitch = 1.0;
+
+      const voices = window.speechSynthesis.getVoices();
+      const naturalVoice = voices.find(v => (v.name.includes('Google') || v.name.includes('Natural')) && (v.lang.includes('en') || v.lang.includes('hi')));
+      if (naturalVoice) utterance.voice = naturalVoice;
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function scrollBottom() {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>
